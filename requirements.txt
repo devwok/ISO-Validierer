@@ -1,5 +1,5 @@
 # ISO 20022 Payment Validator - Dependencies (Fixed for Streamlit Cloud)
 streamlit==1.31.0
 xmlschema==3.0.2
-lxml==5.2.2
+lxml
 pandas==2.2.0
