@@ -1,5 +1,4 @@
-# ISO 20022 Payment Validator - Dependencies
-streamlit==1.31.0
-xmlschema==3.0.2
-lxml==5.3.0
-pandas==2.2.0
+streamlit
+pandas
+lxml>=5.1.0
+xmlschema
