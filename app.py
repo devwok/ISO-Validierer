@@ -4,13 +4,99 @@ from validators.coba_validator import CoBaValidator
 import utils
 import pandas as pd
 
+# --- SAP STYLE CSS ---
+SAP_STYLE = """
+<style>
+    /* SAP Blau-Grau Theme */
+    .sap-section {
+        background: linear-gradient(to bottom, #d4e4f7 0%, #c5d9ed 100%);
+        border: 1px solid #8fb3d9;
+        border-radius: 3px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .sap-header {
+        background: linear-gradient(to bottom, #b8d4f1 0%, #a8c8ea 100%);
+        border: 1px solid #7ba7d6;
+        padding: 8px 12px;
+        font-weight: bold;
+        color: #003366;
+        border-radius: 3px 3px 0 0;
+        margin-bottom: 0;
+    }
+    
+    .sap-field-row {
+        display: grid;
+        grid-template-columns: 150px 1fr 150px 1fr;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #d0d0d0;
+    }
+    
+    .sap-field-label {
+        color: #333;
+        font-size: 13px;
+        font-weight: normal;
+        padding: 5px 0;
+    }
+    
+    .sap-field-value {
+        background: white;
+        border: 1px solid #999;
+        padding: 4px 8px;
+        font-family: monospace;
+        font-size: 13px;
+        border-radius: 2px;
+    }
+    
+    .sap-tab-active {
+        background: #e8f4ff;
+        border: 2px solid #5c9dd5;
+        border-bottom: none;
+        padding: 8px 16px;
+        font-weight: bold;
+        border-radius: 4px 4px 0 0;
+    }
+    
+    /* Streamlit Override */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: #d4e4f7;
+        border: 1px solid #8fb3d9;
+        border-radius: 4px 4px 0 0;
+        padding: 8px 16px;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: white;
+        border-bottom: 2px solid white;
+    }
+    
+    div[data-testid="stMetricValue"] {
+        font-size: 14px;
+        color: #003366;
+        font-family: monospace;
+    }
+</style>
+"""
+
 # --- SETUP ---
-st.set_page_config(page_title="ISO Payment Cockpit", page_icon="💶", layout="wide")
+st.set_page_config(
+    page_title="ISO Payment Validator | SAP Style", 
+    page_icon="📋", 
+    layout="wide"
+)
+st.markdown(SAP_STYLE, unsafe_allow_html=True)
+
 XSD_PATH = "schemas/pain.001.001.09.xsd"
 
-# --- SIDEBAR ---
+# --- SIDEBAR (SAP Navigation Style) ---
 with st.sidebar:
-    st.header("Konfiguration")
+    st.markdown("### ⚙️ Einstellungen")
     bank = st.selectbox("Hausbank Profil", ["HypoVereinsbank", "Commerzbank"])
     
     if bank == "HypoVereinsbank":
@@ -19,11 +105,18 @@ with st.sidebar:
         validator = CoBaValidator(XSD_PATH)
         
     st.divider()
-    st.info("v2.3 Enhanced | Improved UI")
+    st.caption("📌 **ISO 20022 Payment Validator**")
+    st.caption("Version 2.4 | SAP Style")
 
 # --- MAIN ---
-st.title(f"🌍 ISO Payment Cockpit: {bank}")
-uploaded_file = st.file_uploader("Zahlungsdatei (XML) hier ablegen", type=["xml"])
+st.title("📋 Free Form Payment | ISO 20022 Validator")
+st.caption(f"Aktives Profil: **{bank}**")
+
+uploaded_file = st.file_uploader(
+    "📂 Zahlungsdatei hochladen (pain.001.001.09 XML)", 
+    type=["xml"],
+    help="Wählen Sie eine ISO 20022 XML-Datei zum Validieren und Anzeigen"
+)
 
 if uploaded_file:
     xml_bytes = uploaded_file.read()
@@ -35,170 +128,188 @@ if uploaded_file:
     # 2. Parsen
     data = utils.parse_payment_data(xml_bytes)
 
-    # --- TABS ---
-    tab_check, tab_view, tab_rules, tab_xml = st.tabs([
-        "🔍 Prüfung & Protokoll", 
-        "💳 Zahlungs-Maske", 
-        "📜 Bank-Regeln",
-        "📄 XML Analyse"
+    # --- TABS (SAP Style) ---
+    tab_payment, tab_check, tab_rules, tab_xml = st.tabs([
+        "💳 Payment Data", 
+        "🔍 Validation Log",
+        "📜 Bank Rules",
+        "📄 XML Source"
     ])
 
-    # TAB 1: PROTOKOLL
+    # ========== TAB 1: PAYMENT DATA (SAP FIBLFFP Style) ==========
+    with tab_payment:
+        if data:
+            for batch_idx, b in enumerate(data['batches'], 1):
+                
+                # === PAYEE SECTION ===
+                st.markdown('<div class="sap-header">Payee</div>', unsafe_allow_html=True)
+                st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    st.text_input("Name", value=b['dbtr'], disabled=True, key=f"payee_name_{batch_idx}")
+                    st.text_input("Bank Account (IBAN)", value=b['iban'], disabled=True, key=f"payee_iban_{batch_idx}")
+                
+                with col2:
+                    st.text_input("Reference (PmtInfId)", value=b['id'], disabled=True, key=f"ref_{batch_idx}")
+                    # Bank Country und Bank Key würden hier stehen (nicht in ISO XML)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # === POSTING DATA SECTION ===
+                st.markdown('<div class="sap-header">Posting Data</div>', unsafe_allow_html=True)
+                st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    # Company Code / Business Area nicht in ISO direkt
+                    st.text_input("Payment Batch ID", value=b['id'], disabled=True, key=f"batch_{batch_idx}")
+                
+                with col2:
+                    st.text_input("Execution Date", value=b['date'], disabled=True, key=f"date_{batch_idx}")
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # === PAYMENT DATA TAB SECTION ===
+                payment_tab, additional_tab = st.tabs(["Payment Data", "Additional"])
+                
+                with payment_tab:
+                    st.markdown('<div class="sap-header">Payment Overview</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                    
+                    # Summary Metrics
+                    metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+                    with metric_col1:
+                        st.metric("Total Transactions", len(b['txs']))
+                    with metric_col2:
+                        st.metric("Control Sum", f"{b.get('ctrl_sum', '-')} {b.get('ccy', 'EUR')}")
+                    with metric_col3:
+                        st.metric("Currency", b.get('ccy', 'EUR'))
+                    with metric_col4:
+                        st.metric("Payment Method", "SEPA CT")  # Hardcoded, could parse from XML
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # === TRANSACTIONS TABLE (SAP Style) ===
+                    st.markdown('<div class="sap-header">Transaction Items</div>', unsafe_allow_html=True)
+                    
+                    if b['txs']:
+                        tx_data = []
+                        for idx, tx in enumerate(b['txs'], 1):
+                            tx_data.append({
+                                "Item": idx,
+                                "Creditor Name": tx['cdtr'],
+                                "IBAN": tx['cdtr_iban'],
+                                "Amount": f"{tx['amt']} {tx['ccy']}",
+                                "Reference (E2E)": tx['e2e'],
+                                "Reference Text": tx['rmt'][:40] + "..." if len(tx['rmt']) > 40 else tx['rmt'],
+                            })
+                        
+                        df = pd.DataFrame(tx_data)
+                        
+                        # Display as table
+                        st.dataframe(
+                            df,
+                            use_container_width=True,
+                            hide_index=True,
+                            height=400
+                        )
+                        
+                        # === INDIVIDUAL TRANSACTION DETAILS (SAP Form Style) ===
+                        st.markdown("---")
+                        st.markdown("#### 🔍 Transaction Details")
+                        
+                        selected_tx = st.selectbox(
+                            "Select Transaction to View",
+                            range(1, len(b['txs']) + 1),
+                            format_func=lambda x: f"Transaction {x}: {b['txs'][x-1]['cdtr']} - {b['txs'][x-1]['amt']} {b['txs'][x-1]['ccy']}",
+                            key=f"tx_select_{batch_idx}"
+                        )
+                        
+                        if selected_tx:
+                            tx = b['txs'][selected_tx - 1]
+                            
+                            st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                            
+                            # Transaction Form (SAP 2-column layout)
+                            form_col1, form_col2 = st.columns([1, 1])
+                            
+                            with form_col1:
+                                st.text_input("Creditor Name", value=tx['cdtr'], disabled=True, key=f"tx_name_{batch_idx}_{selected_tx}")
+                                st.text_input("IBAN", value=tx['cdtr_iban'], disabled=True, key=f"tx_iban_{batch_idx}_{selected_tx}")
+                                st.text_input("Amount", value=f"{tx['amt']} {tx['ccy']}", disabled=True, key=f"tx_amt_{batch_idx}_{selected_tx}")
+                            
+                            with form_col2:
+                                st.text_input("End-to-End Reference", value=tx['e2e'], disabled=True, key=f"tx_e2e_{batch_idx}_{selected_tx}")
+                                if tx.get('cdtr_bic') and tx['cdtr_bic'] != '-':
+                                    st.text_input("BIC", value=tx['cdtr_bic'], disabled=True, key=f"tx_bic_{batch_idx}_{selected_tx}")
+                                if tx.get('purp') and tx['purp'] != '-':
+                                    st.text_input("Purpose Code", value=tx['purp'], disabled=True, key=f"tx_purp_{batch_idx}_{selected_tx}")
+                            
+                            st.text_area(
+                                "Reference Text (Verwendungszweck)", 
+                                value=tx['rmt'], 
+                                height=80, 
+                                disabled=True,
+                                key=f"tx_rmt_{batch_idx}_{selected_tx}"
+                            )
+                            
+                            st.markdown('</div>', unsafe_allow_html=True)
+                
+                with additional_tab:
+                    st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                    st.info("📌 Additional payment information (if available in XML)")
+                    
+                    # Header Info
+                    h = data['header']
+                    st.text_input("Message ID (MsgId)", value=h['id'], disabled=True, key=f"msgid_{batch_idx}")
+                    st.text_input("Creation DateTime", value=h['cre_dt'], disabled=True, key=f"credt_{batch_idx}")
+                    st.text_input("Initiating Party", value=h['init_pty'], disabled=True, key=f"initpty_{batch_idx}")
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Separator between batches
+                if batch_idx < len(data['batches']):
+                    st.markdown("---")
+                    st.markdown("---")
+        
+        else:
+            st.error("❌ Could not parse payment file. Please check XML structure.")
+
+    # ========== TAB 2: VALIDATION LOG ==========
     with tab_check:
-        st.subheader("Validierungs-Ergebnis")
+        st.subheader("🔍 Validation Results")
+        
         if not validator.errors:
-            st.success("✅ **Datei ist technisch und fachlich korrekt.**")
+            st.success("✅ **File is technically and functionally correct.**")
         else:
             errs = [e for e in validator.errors if e['level'] in ['CRITICAL','ERROR']]
             warns = [e for e in validator.errors if e['level'] == 'WARNING']
-            c1, c2 = st.columns(2)
-            c1.metric("Fehler", len(errs))
-            c2.metric("Warnungen", len(warns))
+            
+            col1, col2 = st.columns(2)
+            col1.metric("❌ Errors", len(errs))
+            col2.metric("⚠️ Warnings", len(warns))
+            
             st.divider()
+            
             for e in validator.errors:
                 icon = "🛑" if e['level'] == 'CRITICAL' else "🟠" if e['level'] == 'ERROR' else "⚠️"
-                with st.expander(f"{icon} Zeile {e['line']}: {e['title']}", expanded=True):
+                with st.expander(f"{icon} Line {e['line']}: {e['title']}", expanded=True):
                     st.write(e['msg'])
-                    if e.get('tag'): st.code(f"Tag: <{e['tag']}>")
+                    if e.get('tag'): 
+                        st.code(f"XML Tag: <{e['tag']}>")
 
-    # TAB 2: ZAHLUNGS-MASKE (VERBESSERT)
-    with tab_view:
-        if data:
-            h = data['header']
-            
-            # HEADER SECTION - Kompakt mit XML-Tags
-            st.markdown("### 📋 Nachrichtenkopf (GrpHdr)")
-            
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Nachrichten-ID (MsgId)", h['id'])
-            with col2:
-                st.metric("Erstellungsdatum (CreDtTm)", h['cre_dt'])
-            with col3:
-                st.metric("Einreicher (InitgPty/Nm)", h['init_pty'])
-            with col4:
-                st.metric("Anzahl Sammler", len(data['batches']))
-            
-            st.divider()
-            
-            # BATCH/SAMMLER SECTION
-            for i, b in enumerate(data['batches'], 1):
-                st.markdown(f"### 📦 Sammler {i} / Payment Information")
-                
-                # Sammler-Header in 2 Spalten
-                col_left, col_right = st.columns([1, 1])
-                
-                with col_left:
-                    st.markdown("#### 👤 Auftraggeber (Debtor)")
-                    st.info(f"""
-**Name (Dbtr/Nm):**  
-`{b['dbtr']}`
-
-**IBAN (DbtrAcct/Id/IBAN):**  
-`{b['iban']}`
-
-**BIC (DbtrAgt/FinInstnId/BICFI):**  
-`{b.get('bic', '-')}`
-                    """)
-                
-                with col_right:
-                    st.markdown("#### 📅 Ausführungsdetails")
-                    st.success(f"""
-**Sammler-ID (PmtInfId):**  
-`{b['id']}`
-
-**Ausführungsdatum (ReqdExctnDt):**  
-`{b['date']}`
-
-**Anzahl Transaktionen (NbOfTxs):**  
-`{len(b['txs'])}`
-
-**Gesamtbetrag (CtrlSum):**  
-`{b.get('ctrl_sum', '-')} {b.get('ccy', 'EUR')}`
-                    """)
-                
-                # TRANSAKTIONEN als Tabelle
-                st.markdown(f"#### 💸 Transaktionen ({len(b['txs'])} Stück)")
-                
-                if b['txs']:
-                    # DataFrame für bessere Darstellung
-                    tx_data = []
-                    for idx, tx in enumerate(b['txs'], 1):
-                        tx_data.append({
-                            "Nr.": idx,
-                            "E2E-Referenz\n(EndToEndId)": tx['e2e'],
-                            "Empfänger\n(Cdtr/Nm)": tx['cdtr'],
-                            "IBAN\n(CdtrAcct/Id/IBAN)": tx['cdtr_iban'],
-                            "Betrag\n(InstdAmt)": f"{tx['amt']} {tx['ccy']}",
-                            "Verwendungszweck\n(RmtInf/Ustrd)": tx['rmt'][:50] + "..." if len(tx['rmt']) > 50 else tx['rmt'],
-                            "Purpose\n(Purp/Cd)": tx.get('purp', '-')
-                        })
-                    
-                    df = pd.DataFrame(tx_data)
-                    
-                    # Konfigurierbare Tabelle mit Highlighting
-                    st.dataframe(
-                        df,
-                        use_container_width=True,
-                        hide_index=True,
-                        column_config={
-                            "Betrag\n(InstdAmt)": st.column_config.TextColumn(
-                                width="medium",
-                            ),
-                            "Verwendungszweck\n(RmtInf/Ustrd)": st.column_config.TextColumn(
-                                width="large",
-                            ),
-                        }
-                    )
-                    
-                    # Detail-Expander für jede Transaktion
-                    with st.expander("🔎 Detail-Ansicht Transaktionen", expanded=False):
-                        for idx, tx in enumerate(b['txs'], 1):
-                            with st.container(border=True):
-                                st.markdown(f"**Transaktion #{idx}**")
-                                
-                                detail_col1, detail_col2, detail_col3 = st.columns(3)
-                                
-                                with detail_col1:
-                                    st.markdown("**📤 Zahlung**")
-                                    st.text(f"E2E-ID (EndToEndId):\n{tx['e2e']}")
-                                    st.text(f"Instr-ID (InstrId):\n{tx.get('instr_id', '-')}")
-                                    st.text(f"Betrag (InstdAmt):\n{tx['amt']} {tx['ccy']}")
-                                
-                                with detail_col2:
-                                    st.markdown("**👥 Empfänger**")
-                                    st.text(f"Name (Cdtr/Nm):\n{tx['cdtr']}")
-                                    st.text(f"IBAN (CdtrAcct/Id/IBAN):\n{tx['cdtr_iban']}")
-                                    st.text(f"BIC (CdtrAgt/FinInstnId/BICFI):\n{tx.get('cdtr_bic', '-')}")
-                                
-                                with detail_col3:
-                                    st.markdown("**📝 Verwendung**")
-                                    st.text_area(
-                                        "Zweck (RmtInf/Ustrd):",
-                                        tx['rmt'],
-                                        height=100,
-                                        disabled=True,
-                                        key=f"rmt_{i}_{idx}"
-                                    )
-                                    if tx.get('purp') and tx['purp'] != '-':
-                                        st.text(f"Purpose Code (Purp/Cd):\n{tx['purp']}")
-                
-                # Trennlinie zwischen Sammlern
-                if i < len(data['batches']):
-                    st.markdown("---")
-        else:
-            st.error("❌ Datei konnte nicht visualisiert werden (Strukturfehler).")
-
-    # TAB 3: REGELN
+    # ========== TAB 3: BANK RULES ==========
     with tab_rules:
-        st.subheader("Aktives Profil")
+        st.subheader("📜 Active Bank Profile")
         st.markdown(f"## {profile_name}")
         st.markdown(profile_desc)
 
-    # TAB 4: XML
+    # ========== TAB 4: XML SOURCE ==========
     with tab_xml:
-        st.subheader("Detail-Analyse")
+        st.subheader("📄 XML Source Analysis")
         if validator.errors:
-            st.caption("🔴 Fehlerhafte Zeilen sind rot markiert.")
+            st.caption("🔴 Lines with errors are highlighted in red.")
+        
         html_view = utils.render_highlighted_xml(xml_bytes, validator.errors)
         st.markdown(html_view, unsafe_allow_html=True)
