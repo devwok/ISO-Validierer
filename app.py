@@ -4,135 +4,79 @@ from validators.coba_validator import CoBaValidator
 import utils
 import pandas as pd
 
-# --- SAP STYLE CSS ---
-SAP_STYLE = """
+# --- READABILITY-FOCUSED CSS ---
+CLEAN_STYLE = """
 <style>
-    /* Logo in Sidebar */
-    .sidebar-logo {
-        text-align: center;
-        padding: 20px 10px;
-        margin-bottom: 20px;
-    }
+    /* ==================== MAXIMUM READABILITY ==================== */
     
-    .sidebar-logo img {
-        max-width: 180px;
-        height: auto;
-    }
-    
-    /* Header Logo */
-    .header-logo {
-        display: inline-block;
-        vertical-align: middle;
-        margin-right: 15px;
-    }
-    
-    .header-logo img {
-        height: 50px;
-        width: auto;
-    }
-    
-    /* SAP Blau-Grau Theme - IMPROVED CONTRAST */
-    .sap-section {
-        background: linear-gradient(to bottom, #e8f2fc 0%, #d8e8f7 100%);
-        border: 1px solid #8fb3d9;
-        border-radius: 3px;
-        padding: 15px;
-        margin: 10px 0;
-    }
-    
-    .sap-header {
-        background: linear-gradient(to bottom, #b8d4f1 0%, #a8c8ea 100%);
-        border: 1px solid #7ba7d6;
-        padding: 8px 12px;
-        font-weight: bold;
-        color: #002244;  /* Darker for better readability */
-        font-size: 14px;
-        border-radius: 3px 3px 0 0;
-        margin-bottom: 0;
-    }
-    
-    /* IMPROVED: Darker text, better contrast */
-    .sap-field-label {
-        color: #1a1a1a;  /* Much darker! */
-        font-size: 13px;
-        font-weight: 500;
-        padding: 5px 0;
-    }
-    
-    .sap-field-value {
-        background: white;
-        border: 1px solid #999;
-        padding: 4px 8px;
-        font-family: monospace;
-        font-size: 13px;
-        color: #000000;  /* Pure black for readability */
-        border-radius: 2px;
-    }
-    
-    /* Streamlit Input Fields - IMPROVED */
-    .stTextInput input {
-        color: #000000 !important;  /* Black text */
+    /* Input Fields - BLACK TEXT on WHITE */
+    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+        color: #000000 !important;
         font-weight: 500 !important;
         background: white !important;
+        border: 1px solid #999 !important;
     }
     
-    .stTextArea textarea {
-        color: #000000 !important;  /* Black text */
-        font-weight: 500 !important;
-        background: white !important;
-    }
-    
-    /* Labels - IMPROVED */
-    .stTextInput label, .stTextArea label, .stSelectbox label {
-        color: #1a1a1a !important;  /* Dark text */
+    /* Labels - BLACK & BOLD */
+    .stTextInput label, .stTextArea label, .stSelectbox label, label {
+        color: #000000 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
     }
     
-    /* Metrics - IMPROVED */
+    /* Metrics - LARGE & BLACK */
     div[data-testid="stMetricValue"] {
-        font-size: 16px !important;
-        color: #002244 !important;  /* Dark blue */
+        font-size: 20px !important;
+        color: #000000 !important;
         font-weight: bold !important;
-        font-family: monospace;
     }
     
     div[data-testid="stMetricLabel"] {
-        color: #1a1a1a !important;  /* Dark */
+        color: #000000 !important;
         font-weight: 600 !important;
-        font-size: 13px !important;
+        font-size: 14px !important;
     }
     
-    /* Tabs - IMPROVED */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background: #d4e4f7;
-        border: 1px solid #8fb3d9;
-        border-radius: 4px 4px 0 0;
-        padding: 8px 16px;
-        color: #002244 !important;  /* Darker tab text */
-        font-weight: 600 !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: white;
-        border-bottom: 2px solid white;
-        color: #001122 !important;  /* Even darker for active tab */
+    /* Headers - BLACK */
+    h1, h2, h3, h4, h5, h6 {
+        color: #000000 !important;
         font-weight: bold !important;
     }
     
-    /* DataFrames - IMPROVED */
+    /* Text - BLACK (no gray!) */
+    p, span, div {
+        color: #000000;
+    }
+    
+    /* Captions - Dark Gray */
+    .stCaption {
+        color: #444444 !important;
+        font-size: 13px !important;
+    }
+    
+    /* Tabs - BOLD & CLEAR */
+    .stTabs [data-baseweb="tab"] {
+        color: #000000 !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        padding: 10px 20px !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        color: #0066cc !important;
+        font-weight: bold !important;
+        border-bottom: 3px solid #0066cc !important;
+    }
+    
+    /* DataFrames - BLACK TEXT */
     .dataframe {
         font-size: 13px !important;
         color: #000000 !important;
     }
     
     .dataframe th {
-        background: #b8d4f1 !important;
-        color: #002244 !important;
+        background: #e8f4ff !important;
+        color: #000000 !important;
         font-weight: bold !important;
     }
     
@@ -140,37 +84,36 @@ SAP_STYLE = """
         color: #000000 !important;
     }
     
-    /* General text readability */
-    p, span, div {
-        color: #1a1a1a;
+    /* Sidebar - Light Background */
+    [data-testid="stSidebar"] {
+        background-color: #f8f9fa !important;
     }
     
-    /* Caption text */
-    .stCaption {
-        color: #333333 !important;
-        font-size: 12px !important;
+    /* Info/Success Boxes - Readable */
+    .stAlert {
+        color: #000000 !important;
     }
 </style>
 """
 
 # --- SETUP ---
 st.set_page_config(
-    page_title="ISO Payment Validator | SAP Style", 
+    page_title="ISO 20022 Payment Validator | KTC", 
     page_icon="📋", 
     layout="wide"
 )
-st.markdown(SAP_STYLE, unsafe_allow_html=True)
+st.markdown(CLEAN_STYLE, unsafe_allow_html=True)
 
 XSD_PATH = "schemas/pain.001.001.09.xsd"
 
-# --- SIDEBAR (SAP Navigation Style) ---
+# --- SIDEBAR ---
 with st.sidebar:
-    # KTC LOGO
+    # KTC LOGO - Nur 1x, kleiner!
     try:
-        st.image("KTC_Logo_blauer_Hintergrund.png", use_column_width=True)
+        st.image("KTC_Logo_blauer_Hintergrund.png", width=150)
         st.markdown("<br>", unsafe_allow_html=True)
     except:
-        st.markdown('<div style="text-align: center; font-size: 40px; padding: 20px;">🏢</div>', unsafe_allow_html=True)
+        st.markdown("🏢", unsafe_allow_html=True)
     
     st.markdown("### ⚙️ Einstellungen")
     bank = st.selectbox("Hausbank Profil", ["HypoVereinsbank", "Commerzbank"])
@@ -182,39 +125,30 @@ with st.sidebar:
         
     st.divider()
     st.caption("📌 **ISO 20022 Payment Validator**")
-    st.caption("Version 2.5 | KTC Treasury Consulting")
+    st.caption("Version 2.6 | KTC Treasury Consulting")
 
-# --- MAIN ---
-# Header with KTC Logo
-col_logo, col_title = st.columns([1, 5])
-with col_logo:
-    try:
-        st.image("KTC_Logo_blauer_Hintergrund.png", width=120)
-    except:
-        st.markdown("### 🏢")
-
-with col_title:
-    st.title("📋 ISO 20022 Payment Validator")
-    st.caption("**KTC Treasury Consulting** | Free Form Payment Tool")
-    st.caption(f"Aktives Bankprofil: **{bank}**")
+# --- MAIN HEADER (ohne Logo!) ---
+st.title("📋 ISO 20022 Payment Validator")
+st.markdown("**KTC Treasury Consulting** | Free Form Payment Tool")
+st.caption(f"Aktives Bankprofil: **{bank}**")
 
 uploaded_file = st.file_uploader(
     "📂 Zahlungsdatei hochladen (pain.001.001.09 XML)", 
     type=["xml"],
-    help="Wählen Sie eine ISO 20022 XML-Datei zum Validieren und Anzeigen"
+    help="Wählen Sie eine ISO 20022 XML-Datei"
 )
 
 if uploaded_file:
     xml_bytes = uploaded_file.read()
     
-    # 1. Validieren
+    # Validieren
     validator.validate(xml_bytes)
     profile_name, profile_desc = validator.get_profile_info()
     
-    # 2. Parsen
+    # Parsen
     data = utils.parse_payment_data(xml_bytes)
 
-    # --- TABS (SAP Style) ---
+    # --- TABS ---
     tab_payment, tab_check, tab_rules, tab_xml = st.tabs([
         "💳 Payment Data", 
         "🔍 Validation Log",
@@ -222,62 +156,53 @@ if uploaded_file:
         "📄 XML Source"
     ])
 
-    # ========== TAB 1: PAYMENT DATA (SAP FIBLFFP Style) ==========
+    # ========== TAB 1: PAYMENT DATA ==========
     with tab_payment:
         if data:
             for batch_idx, b in enumerate(data['batches'], 1):
                 
-                # === PAYEE SECTION ===
-                st.markdown('<div class="sap-header">Payee</div>', unsafe_allow_html=True)
-                st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                # PAYEE SECTION
+                st.markdown("### 👤 Payee")
                 
-                col1, col2 = st.columns([1, 1])
+                col1, col2 = st.columns(2)
                 with col1:
                     st.text_input("Name", value=b['dbtr'], disabled=True, key=f"payee_name_{batch_idx}")
                     st.text_input("Bank Account (IBAN)", value=b['iban'], disabled=True, key=f"payee_iban_{batch_idx}")
                 
                 with col2:
                     st.text_input("Reference (PmtInfId)", value=b['id'], disabled=True, key=f"ref_{batch_idx}")
-                    # Bank Country und Bank Key würden hier stehen (nicht in ISO XML)
                 
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown("---")
                 
-                # === POSTING DATA SECTION ===
-                st.markdown('<div class="sap-header">Posting Data</div>', unsafe_allow_html=True)
-                st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                # POSTING DATA SECTION
+                st.markdown("### 📊 Posting Data")
                 
-                col1, col2 = st.columns([1, 1])
+                col1, col2 = st.columns(2)
                 with col1:
-                    # Company Code / Business Area nicht in ISO direkt
                     st.text_input("Payment Batch ID", value=b['id'], disabled=True, key=f"batch_{batch_idx}")
                 
                 with col2:
                     st.text_input("Execution Date", value=b['date'], disabled=True, key=f"date_{batch_idx}")
                 
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown("---")
                 
-                # === PAYMENT DATA TAB SECTION ===
-                payment_tab, additional_tab = st.tabs(["Payment Data", "Additional"])
+                # PAYMENT TABS
+                payment_tab, additional_tab = st.tabs(["💳 Payment Data", "📎 Additional"])
                 
                 with payment_tab:
-                    st.markdown('<div class="sap-header">Payment Overview</div>', unsafe_allow_html=True)
-                    st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                    st.markdown("### 📊 Payment Overview")
                     
-                    # Summary Metrics
-                    metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
-                    with metric_col1:
-                        st.metric("Total Transactions", len(b['txs']))
-                    with metric_col2:
-                        st.metric("Control Sum", f"{b.get('ctrl_sum', '-')} {b.get('ccy', 'EUR')}")
-                    with metric_col3:
-                        st.metric("Currency", b.get('ccy', 'EUR'))
-                    with metric_col4:
-                        st.metric("Payment Method", "SEPA CT")  # Hardcoded, could parse from XML
+                    # Metrics
+                    col1, col2, col3, col4 = st.columns(4)
+                    col1.metric("Total Transactions", len(b['txs']))
+                    col2.metric("Control Sum", f"{b.get('ctrl_sum', '-')} {b.get('ccy', 'EUR')}")
+                    col3.metric("Currency", b.get('ccy', 'EUR'))
+                    col4.metric("Payment Method", "SEPA CT")
                     
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown("---")
                     
-                    # === TRANSACTIONS TABLE (SAP Style) ===
-                    st.markdown('<div class="sap-header">Transaction Items</div>', unsafe_allow_html=True)
+                    # TRANSACTIONS TABLE
+                    st.markdown("### 💸 Transaction Items")
                     
                     if b['txs']:
                         tx_data = []
@@ -292,18 +217,11 @@ if uploaded_file:
                             })
                         
                         df = pd.DataFrame(tx_data)
+                        st.dataframe(df, use_container_width=True, hide_index=True, height=400)
                         
-                        # Display as table
-                        st.dataframe(
-                            df,
-                            use_container_width=True,
-                            hide_index=True,
-                            height=400
-                        )
-                        
-                        # === INDIVIDUAL TRANSACTION DETAILS (SAP Form Style) ===
+                        # TRANSACTION SELECTOR
                         st.markdown("---")
-                        st.markdown("#### 🔍 Transaction Details")
+                        st.markdown("### 🔍 Transaction Details")
                         
                         selected_tx = st.selectbox(
                             "Select Transaction to View",
@@ -315,17 +233,16 @@ if uploaded_file:
                         if selected_tx:
                             tx = b['txs'][selected_tx - 1]
                             
-                            st.markdown('<div class="sap-section">', unsafe_allow_html=True)
+                            st.markdown("---")
                             
-                            # Transaction Form (SAP 2-column layout)
-                            form_col1, form_col2 = st.columns([1, 1])
+                            col1, col2 = st.columns(2)
                             
-                            with form_col1:
+                            with col1:
                                 st.text_input("Creditor Name", value=tx['cdtr'], disabled=True, key=f"tx_name_{batch_idx}_{selected_tx}")
                                 st.text_input("IBAN", value=tx['cdtr_iban'], disabled=True, key=f"tx_iban_{batch_idx}_{selected_tx}")
                                 st.text_input("Amount", value=f"{tx['amt']} {tx['ccy']}", disabled=True, key=f"tx_amt_{batch_idx}_{selected_tx}")
                             
-                            with form_col2:
+                            with col2:
                                 st.text_input("End-to-End Reference", value=tx['e2e'], disabled=True, key=f"tx_e2e_{batch_idx}_{selected_tx}")
                                 if tx.get('cdtr_bic') and tx['cdtr_bic'] != '-':
                                     st.text_input("BIC", value=tx['cdtr_bic'], disabled=True, key=f"tx_bic_{batch_idx}_{selected_tx}")
@@ -339,22 +256,17 @@ if uploaded_file:
                                 disabled=True,
                                 key=f"tx_rmt_{batch_idx}_{selected_tx}"
                             )
-                            
-                            st.markdown('</div>', unsafe_allow_html=True)
                 
                 with additional_tab:
-                    st.markdown('<div class="sap-section">', unsafe_allow_html=True)
-                    st.info("📌 Additional payment information (if available in XML)")
+                    st.markdown("### 📎 Additional Information")
+                    st.info("📌 Additional payment information from XML header")
                     
-                    # Header Info
                     h = data['header']
                     st.text_input("Message ID (MsgId)", value=h['id'], disabled=True, key=f"msgid_{batch_idx}")
                     st.text_input("Creation DateTime", value=h['cre_dt'], disabled=True, key=f"credt_{batch_idx}")
                     st.text_input("Initiating Party", value=h['init_pty'], disabled=True, key=f"initpty_{batch_idx}")
-                    
-                    st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Separator between batches
+                # Separator
                 if batch_idx < len(data['batches']):
                     st.markdown("---")
                     st.markdown("---")
@@ -399,4 +311,3 @@ if uploaded_file:
         
         html_view = utils.render_highlighted_xml(xml_bytes, validator.errors)
         st.markdown(html_view, unsafe_allow_html=True)
-
