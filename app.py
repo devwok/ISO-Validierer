@@ -7,9 +7,33 @@ import pandas as pd
 # --- SAP STYLE CSS ---
 SAP_STYLE = """
 <style>
-    /* SAP Blau-Grau Theme */
+    /* Logo in Sidebar */
+    .sidebar-logo {
+        text-align: center;
+        padding: 20px 10px;
+        margin-bottom: 20px;
+    }
+    
+    .sidebar-logo img {
+        max-width: 180px;
+        height: auto;
+    }
+    
+    /* Header Logo */
+    .header-logo {
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 15px;
+    }
+    
+    .header-logo img {
+        height: 50px;
+        width: auto;
+    }
+    
+    /* SAP Blau-Grau Theme - IMPROVED CONTRAST */
     .sap-section {
-        background: linear-gradient(to bottom, #d4e4f7 0%, #c5d9ed 100%);
+        background: linear-gradient(to bottom, #e8f2fc 0%, #d8e8f7 100%);
         border: 1px solid #8fb3d9;
         border-radius: 3px;
         padding: 15px;
@@ -21,23 +45,17 @@ SAP_STYLE = """
         border: 1px solid #7ba7d6;
         padding: 8px 12px;
         font-weight: bold;
-        color: #003366;
+        color: #002244;  /* Darker for better readability */
+        font-size: 14px;
         border-radius: 3px 3px 0 0;
         margin-bottom: 0;
     }
     
-    .sap-field-row {
-        display: grid;
-        grid-template-columns: 150px 1fr 150px 1fr;
-        gap: 10px;
-        padding: 8px 0;
-        border-bottom: 1px solid #d0d0d0;
-    }
-    
+    /* IMPROVED: Darker text, better contrast */
     .sap-field-label {
-        color: #333;
+        color: #1a1a1a;  /* Much darker! */
         font-size: 13px;
-        font-weight: normal;
+        font-weight: 500;
         padding: 5px 0;
     }
     
@@ -47,19 +65,45 @@ SAP_STYLE = """
         padding: 4px 8px;
         font-family: monospace;
         font-size: 13px;
+        color: #000000;  /* Pure black for readability */
         border-radius: 2px;
     }
     
-    .sap-tab-active {
-        background: #e8f4ff;
-        border: 2px solid #5c9dd5;
-        border-bottom: none;
-        padding: 8px 16px;
-        font-weight: bold;
-        border-radius: 4px 4px 0 0;
+    /* Streamlit Input Fields - IMPROVED */
+    .stTextInput input {
+        color: #000000 !important;  /* Black text */
+        font-weight: 500 !important;
+        background: white !important;
     }
     
-    /* Streamlit Override */
+    .stTextArea textarea {
+        color: #000000 !important;  /* Black text */
+        font-weight: 500 !important;
+        background: white !important;
+    }
+    
+    /* Labels - IMPROVED */
+    .stTextInput label, .stTextArea label, .stSelectbox label {
+        color: #1a1a1a !important;  /* Dark text */
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+    
+    /* Metrics - IMPROVED */
+    div[data-testid="stMetricValue"] {
+        font-size: 16px !important;
+        color: #002244 !important;  /* Dark blue */
+        font-weight: bold !important;
+        font-family: monospace;
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        color: #1a1a1a !important;  /* Dark */
+        font-weight: 600 !important;
+        font-size: 13px !important;
+    }
+    
+    /* Tabs - IMPROVED */
     .stTabs [data-baseweb="tab-list"] {
         gap: 2px;
     }
@@ -69,17 +113,42 @@ SAP_STYLE = """
         border: 1px solid #8fb3d9;
         border-radius: 4px 4px 0 0;
         padding: 8px 16px;
+        color: #002244 !important;  /* Darker tab text */
+        font-weight: 600 !important;
     }
     
     .stTabs [aria-selected="true"] {
         background: white;
         border-bottom: 2px solid white;
+        color: #001122 !important;  /* Even darker for active tab */
+        font-weight: bold !important;
     }
     
-    div[data-testid="stMetricValue"] {
-        font-size: 14px;
-        color: #003366;
-        font-family: monospace;
+    /* DataFrames - IMPROVED */
+    .dataframe {
+        font-size: 13px !important;
+        color: #000000 !important;
+    }
+    
+    .dataframe th {
+        background: #b8d4f1 !important;
+        color: #002244 !important;
+        font-weight: bold !important;
+    }
+    
+    .dataframe td {
+        color: #000000 !important;
+    }
+    
+    /* General text readability */
+    p, span, div {
+        color: #1a1a1a;
+    }
+    
+    /* Caption text */
+    .stCaption {
+        color: #333333 !important;
+        font-size: 12px !important;
     }
 </style>
 """
@@ -96,6 +165,13 @@ XSD_PATH = "schemas/pain.001.001.09.xsd"
 
 # --- SIDEBAR (SAP Navigation Style) ---
 with st.sidebar:
+    # KTC LOGO
+    try:
+        st.image("KTC_Logo_blauer_Hintergrund.png", use_column_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+    except:
+        st.markdown('<div style="text-align: center; font-size: 40px; padding: 20px;">🏢</div>', unsafe_allow_html=True)
+    
     st.markdown("### ⚙️ Einstellungen")
     bank = st.selectbox("Hausbank Profil", ["HypoVereinsbank", "Commerzbank"])
     
@@ -106,11 +182,21 @@ with st.sidebar:
         
     st.divider()
     st.caption("📌 **ISO 20022 Payment Validator**")
-    st.caption("Version 2.4 | SAP Style")
+    st.caption("Version 2.5 | KTC Treasury Consulting")
 
 # --- MAIN ---
-st.title("📋 Free Form Payment | ISO 20022 Validator")
-st.caption(f"Aktives Profil: **{bank}**")
+# Header with KTC Logo
+col_logo, col_title = st.columns([1, 5])
+with col_logo:
+    try:
+        st.image("KTC_Logo_blauer_Hintergrund.png", width=120)
+    except:
+        st.markdown("### 🏢")
+
+with col_title:
+    st.title("📋 ISO 20022 Payment Validator")
+    st.caption("**KTC Treasury Consulting** | Free Form Payment Tool")
+    st.caption(f"Aktives Bankprofil: **{bank}**")
 
 uploaded_file = st.file_uploader(
     "📂 Zahlungsdatei hochladen (pain.001.001.09 XML)", 
@@ -313,3 +399,4 @@ if uploaded_file:
         
         html_view = utils.render_highlighted_xml(xml_bytes, validator.errors)
         st.markdown(html_view, unsafe_allow_html=True)
+
